@@ -9,4 +9,6 @@ router.post('/', authMiddleware(['Admin']), userService.createUser)
 
 router.post('/login', userService.userLogin)
 
+router.post('/refresh-token', userService.refreshToken)
+
 module.exports = router

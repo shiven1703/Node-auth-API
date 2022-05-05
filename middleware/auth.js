@@ -2,39 +2,18 @@ const bluebird = require('bluebird')
 const jwt = require('jsonwebtoken')
 
 // extra
-const config = require('config')
-const { MissingHeader, JwtError, HttpError } = require('../utils/customErrors')
-
-// promisification of jwt verify method
-const jwtVerifyAsync = bluebird.promisify(jwt.verify)
-
-const verifyAccessToken = async (token) => {
-  try {
-    const accessToken = await jwtVerifyAsync(
-      token,
-      config.get('modules.user.token.private_key')
-    )
-    return accessToken
-  } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      throw new JwtError('Access token expired.')
-    } else if (err.name === 'JsonWebTokenError') {
-      // console.log(err)
-      throw new JwtError('Invalid access token')
-    } else {
-      throw err
-    }
-  }
-}
+const token = require('../utils/token')
+const { MissingHeader, HttpError } = require('../utils/customErrors')
 
 module.exports = (allowedRoles) => {
   return async (req, res, next) => {
-    let receivedToken = req.headers.authorization.startsWith('Bearer ')
+    let receivedToken = req.headers.authorization
 
     try {
       if (receivedToken) {
+        receivedToken = req.headers.authorization.startsWith('Bearer ')
         receivedToken = req.headers.authorization.split(' ')[1]
-        const accessToken = await verifyAccessToken(receivedToken)
+        const accessToken = await token.verifyAccessToken(receivedToken)
 
         if (allowedRoles.includes(accessToken.role)) {
           req.user = {
@@ -64,7 +43,7 @@ module.exports = (allowedRoles) => {
           error: err.message,
         })
       } else {
-        throw err
+        next(err)
       }
     }
   }

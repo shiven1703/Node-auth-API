@@ -108,8 +108,8 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
     await refToken.save()
 
     return {
-      access_token,
-      refresh_token,
+      access_token: `Bearer ${access_token}`,
+      refresh_token: `Bearer ${refresh_token}`,
     }
   } catch (err) {
     throw err
