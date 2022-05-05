@@ -2,10 +2,6 @@ const schema = require('./user.schema')
 const userDAL = require('./user.DAL.js')
 const validator = require('../../utils/schemaValidator')
 
-const homeRoute = async (req, res) => {
-  res.status(200).send('<h1>Home of user component</h1>')
-}
-
 const createUser = async (req, res) => {
   try {
     const user = await validator.validate(schema.userSchema, req.body)
@@ -33,6 +29,5 @@ const createUser = async (req, res) => {
 }
 
 module.exports = {
-  homeRoute,
   createUser,
 }

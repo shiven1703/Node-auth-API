@@ -2,8 +2,8 @@ const express = require('express')
 const userService = require('./user.service')
 const router = express.Router()
 
-router.get('/', userService.homeRoute)
+router.post('/', userService.createUser)
 
-router.post('/create', userService.createUser)
+router.post('/login')
 
 module.exports = router
