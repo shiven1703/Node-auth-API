@@ -4,5 +4,18 @@
     },
     "database": {
         "mongoUrl": "mongodb://localhost:27017/auth"
+    },
+    "modules": {
+        "user": {
+            "token": {
+                "private_key": "a6D9`#f%(+Cg[Sxh>-k<tUC0F?5w0_",
+                "access_token": {
+                    "exp_time": "5m"
+                },
+                "refresh_token": {
+                    "exp_time": "1h"
+                }
+            }
+        }
     }
 }

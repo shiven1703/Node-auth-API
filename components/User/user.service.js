@@ -12,17 +12,38 @@ const createUser = async (req, res) => {
   } catch (err) {
     if (err.name === 'InvalidPayload') {
       res.status(400).json({
-        error: 'invalid payload',
-        msg: err.message,
+        error: err.message,
       })
     } else if (err.name === 'DBValidationError') {
       res.status(409).json({
-        error: 'User already exist',
-        msg: err.message,
+        error: err.message,
       })
     } else {
       res.status(500).json({
-        msg: 'internal server error',
+        error: 'Internal Server Error',
+      })
+    }
+  }
+}
+
+const userLogin = async (req, res) => {
+  try {
+    const loginData = await validator.validate(schema.loginSchema, req.body)
+    const tokens = await userDAL.authenticateUser(loginData)
+    res.status(200).json(tokens)
+  } catch (err) {
+    if (err.name === 'InvalidPayload') {
+      res.status(400).json({
+        error: err.message,
+      })
+    } else if (err.name === 'InvalidUser') {
+      res.status(401).json({
+        error: err.message,
+      })
+    } else {
+      console.log(err)
+      res.status(500).json({
+        error: 'Internal Server Error',
       })
     }
   }
@@ -30,4 +51,5 @@ const createUser = async (req, res) => {
 
 module.exports = {
   createUser,
+  userLogin,
 }
