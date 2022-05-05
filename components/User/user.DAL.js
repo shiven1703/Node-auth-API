@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid')
 const bluebird = require('bluebird')
 const jwt = require('jsonwebtoken')
 const { DateTime } = require('luxon')
@@ -81,8 +82,10 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
       { expiresIn: config.get('modules.user.token.access_token.exp_time') }
     )
 
+    const tokenId = uuidv4()
     let refresh_token = await jwtSignAsync(
       {
+        token_id: tokenId,
         user_id: user_id,
         role: role,
       },
@@ -91,9 +94,12 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
     )
 
     // adding refToken to db
+
     const refTokenHash = await encypter.makeHash(refresh_token)
     const refExpiration = DateTime.now().plus({ hours: 1 }).toUnixInteger()
+
     const refToken = new refreshToken({
+      token_id: tokenId,
       user_id: user_id,
       token: refTokenHash,
       expiration: refExpiration,

@@ -6,6 +6,7 @@ const connectToDatabase = () => {
     await mongoose
       .connect(config.get('database.mongoUrl'), {
         useUnifiedTopology: true,
+        autoIndex: false,
         maxPoolSize: 50,
         serverSelectionTimeoutMS: 2000,
       })

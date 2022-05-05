@@ -8,6 +8,7 @@ const globalErrorHandler = (err, req, res, next) => {
     }
   }
   // unexpected errors
+  console.log(err)
   res.status(500).json({
     error: 'Something went wrong...please try again',
   })
