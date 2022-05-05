@@ -1,7 +1,6 @@
 const bluebird = require('bluebird')
 const jwt = require('jsonwebtoken')
 
-const config = require('config')
 const { JwtError } = require('../utils/customErrors')
 
 const jwtVerifyAsync = bluebird.promisify(jwt.verify)
@@ -10,7 +9,7 @@ const verifyAccessToken = async (token) => {
   try {
     const accessToken = await jwtVerifyAsync(
       token,
-      config.get('modules.user.token.access_token.private_key')
+      process.env.ACCESS_TOKEN_KEY
     )
     return accessToken
   } catch (err) {
@@ -30,7 +29,7 @@ const verifyRefreshToken = async (token) => {
   try {
     const refreshToken = await jwtVerifyAsync(
       token,
-      config.get('modules.user.token.refresh_token.private_key')
+      process.env.REFRESH_TOKEN_KEY
     )
     return refreshToken
   } catch (err) {
