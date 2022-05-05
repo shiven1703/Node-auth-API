@@ -78,7 +78,7 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
         user_id: user_id,
         role: role,
       },
-      config.get('modules.user.token.private_key'),
+      config.get('modules.user.token.access_token.private_key'),
       { expiresIn: config.get('modules.user.token.access_token.exp_time') }
     )
 
@@ -89,7 +89,7 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
         user_id: user_id,
         role: role,
       },
-      config.get('modules.user.token.private_key'),
+      config.get('modules.user.token.refresh_token.private_key'),
       { expiresIn: config.get('modules.user.token.refresh_token.exp_time') }
     )
 

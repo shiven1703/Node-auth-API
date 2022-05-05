@@ -30,21 +30,7 @@ module.exports = (allowedRoles) => {
         )
       }
     } catch (err) {
-      if (err.name === 'MissingHeader') {
-        res.status(400).json({
-          error: err.message,
-        })
-      } else if (err.name === 'JwtError') {
-        res.status(401).json({
-          error: err.message,
-        })
-      } else if (err.name === 'HttpError') {
-        res.status(err.httpErrorCode).json({
-          error: err.message,
-        })
-      } else {
-        next(err)
-      }
+      next(err)
     }
   }
 }

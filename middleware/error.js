@@ -1,5 +1,9 @@
 const globalErrorHandler = (err, req, res, next) => {
-  if (err.name === 'InvalidPayload') {
+  if (err.name === 'HttpError') {
+    res.status(err.httpErrorCode).json({
+      error: err.message,
+    })
+  } else if (err.name === 'InvalidPayload') {
     return res.status(400).json({
       error: err.message,
     })

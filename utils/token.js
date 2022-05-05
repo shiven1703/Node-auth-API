@@ -10,7 +10,7 @@ const verifyAccessToken = async (token) => {
   try {
     const accessToken = await jwtVerifyAsync(
       token,
-      config.get('modules.user.token.private_key')
+      config.get('modules.user.token.access_token.private_key')
     )
     return accessToken
   } catch (err) {
@@ -30,16 +30,16 @@ const verifyRefreshToken = async (token) => {
   try {
     const refreshToken = await jwtVerifyAsync(
       token,
-      config.get('modules.user.token.private_key')
+      config.get('modules.user.token.refresh_token.private_key')
     )
     return refreshToken
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      throw new JwtError('Access token expired.')
+      throw new JwtError('Refresh token expired.')
     } else if (err.name === 'SyntaxError') {
-      throw new JwtError('Invalid access token')
+      throw new JwtError('Invalid refresh token')
     } else if (err.name === 'JsonWebTokenError') {
-      throw new JwtError('Invalid access token')
+      throw new JwtError('Invalid refresh token')
     } else {
       throw err
     }
