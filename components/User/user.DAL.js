@@ -1,6 +1,4 @@
 const { v4: uuidv4 } = require('uuid')
-const bluebird = require('bluebird')
-const jwt = require('jsonwebtoken')
 const { DateTime } = require('luxon')
 
 // models
@@ -10,10 +8,12 @@ const refreshToken = require('./model/refresh_token')
 // extra
 const config = require('config')
 const encypter = require('../../utils/encryption')
-const { DBValidationError, InvalidUser } = require('../../utils/customErrors')
-
-// promise conversion
-const jwtSignAsync = bluebird.promisify(jwt.sign)
+const token = require('../../utils/token')
+const {
+  DBValidationError,
+  InvalidUser,
+  HttpError,
+} = require('../../utils/customErrors')
 
 const addUser = async ({ firstname, lastname, email, password, role }) => {
   try {
@@ -47,8 +47,8 @@ const authenticateUser = async ({ email, password }) => {
         user.password
       )
       if (isValidPassword) {
-        const token = generateAccessToken(user)
-        return token
+        const tokens = generateTokens(user)
+        return tokens
       }
     }
     throw new InvalidUser('Invalid Username or password.')
@@ -69,39 +69,27 @@ const validateUserPassword = async (userPassword, passwordHash) => {
   }
 }
 
-const generateAccessToken = async ({ _id: user_id, role }) => {
+const generateTokens = async ({ _id: user_id, role }) => {
   try {
     user_id = user_id.toString()
 
-    const access_token = await jwtSignAsync(
-      {
-        user_id: user_id,
-        role: role,
-      },
-      process.env.ACCESS_TOKEN_KEY,
-      { expiresIn: config.get('modules.user.token.access_token.exp_time') }
-    )
+    const access_token = await token.generateAccessToken({
+      user_id: user_id,
+      role: role,
+    })
 
     const tokenId = uuidv4()
-    let refresh_token = await jwtSignAsync(
-      {
-        token_id: tokenId,
-        user_id: user_id,
-        role: role,
-      },
-      process.env.REFRESH_TOKEN_KEY,
-      { expiresIn: config.get('modules.user.token.refresh_token.exp_time') }
-    )
-
+    const refresh_token = await token.generateRefreshToken({
+      token_id: tokenId,
+      user_id: user_id,
+      role: role,
+    })
     // adding refToken to db
-
-    const refTokenHash = await encypter.makeHash(refresh_token)
     const refExpiration = DateTime.now().plus({ hours: 1 }).toUnixInteger()
 
     const refToken = new refreshToken({
       token_id: tokenId,
       user_id: user_id,
-      token: refTokenHash,
       expiration: refExpiration,
     })
 
@@ -116,7 +104,28 @@ const generateAccessToken = async ({ _id: user_id, role }) => {
   }
 }
 
+const refreshUserTokens = async (OldrefreshToken) => {
+  try {
+    const deleteQuery = await refreshToken.deleteOne({
+      token_id: OldrefreshToken.token_id,
+    })
+
+    if (deleteQuery.deletedCount === 1) {
+      const newTokenPair = await generateTokens({
+        _id: OldrefreshToken.user_id,
+        role: OldrefreshToken.role,
+      })
+      return newTokenPair
+    } else {
+      throw new HttpError('Invalid refresh token', 401)
+    }
+  } catch (err) {
+    throw err
+  }
+}
+
 module.exports = {
   addUser,
   authenticateUser,
+  refreshUserTokens,
 }

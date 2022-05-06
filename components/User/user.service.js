@@ -33,11 +33,9 @@ const refreshToken = async (req, res, next) => {
       receivedToken = req.headers.authorization.startsWith('Bearer ')
       receivedToken = req.headers.authorization.split(' ')[1]
 
-      const accessToken = await token.verifyRefreshToken(receivedToken)
-
-      res.status(200).json({
-        accessToken,
-      })
+      const refreshTokenData = await token.verifyRefreshToken(receivedToken)
+      const newTokenPair = await userDAL.refreshUserTokens(refreshTokenData)
+      res.status(200).json(newTokenPair)
     } else {
       throw new MissingHeader(
         'Auhtnetication header not found in the request header.'

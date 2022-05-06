@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 const saltRounds = 10
 
@@ -6,16 +6,23 @@ const makeHash = async (data) => {
   try {
     const salt = await bcrypt.genSalt(saltRounds)
     const hash = await bcrypt.hash(data, salt)
-    return hash
+    return `${salt}:${hash}`
   } catch (err) {
     throw err
   }
 }
 
-const validateHash = async (data, hash) => {
+const validateHash = async (data, dataHash) => {
   try {
-    const isValidHash = await bcrypt.compare(data, hash)
-    return isValidHash
+    const salt = dataHash.split(':')[0]
+    const oldHash = dataHash.split(':')[1]
+    const newHash = await bcrypt.hash(data, salt)
+
+    if (newHash === oldHash) {
+      return true
+    } else {
+      return false
+    }
   } catch (err) {
     throw err
   }

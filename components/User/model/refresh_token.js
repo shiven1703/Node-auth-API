@@ -9,10 +9,6 @@ const refreshTokenSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  token: {
-    type: String,
-    required: true,
-  },
   expiration: {
     type: String,
     required: true,
