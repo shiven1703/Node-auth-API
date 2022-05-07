@@ -10,6 +10,7 @@ const connectToDatabase = () => {
         serverSelectionTimeoutMS: 2000,
       })
       .catch((err) => {
+        console.log(err)
         console.log('Database connection error...')
         reject()
       })
