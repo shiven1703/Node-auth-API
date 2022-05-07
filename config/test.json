@@ -2,9 +2,6 @@
     "app": {
         "port": 7000
     },
-    "database": {
-        "mongoUrl": "mongodb://localhost:27017/auth"
-    },
     "modules": {
         "user": {
             "token": {

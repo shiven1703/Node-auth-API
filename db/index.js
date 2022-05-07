@@ -1,12 +1,11 @@
 const mongoose = require('mongoose')
-const config = require('config')
 
 const connectToDatabase = () => {
   return new Promise(async (resolve, reject) => {
     await mongoose
-      .connect(config.get('database.mongoUrl'), {
+      .connect(process.env.MONGO_URL, {
         useUnifiedTopology: true,
-        autoIndex: false,
+        autoIndex: true,
         maxPoolSize: 50,
         serverSelectionTimeoutMS: 2000,
       })

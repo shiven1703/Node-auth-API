@@ -9,7 +9,8 @@ const removeExpiredRefreshTokens = async () => {
 }
 
 module.exports = () => {
-  cron.schedule('* * * * *', removeExpiredRefreshTokens, {
+  // runs every hours
+  cron.schedule('0 * * * *', removeExpiredRefreshTokens, {
     timezone: config.get('crons.timezone'),
   })
 }
