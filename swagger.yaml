@@ -1,0 +1,252 @@
+openapi: "3.0.0"
+
+info:
+  title: Node Auth API
+  description: A basic API implemented in node.js for providing token based authentication (uses JWT along with refresh token rotation)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:{port}/
+    variables:
+      port:
+        enum:
+          - "5000"
+          - "4000"
+        default: "5000"
+    description: Localhost API endpoint
+  - url: https://sample.url.com/
+    description: Production API endpoint
+
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    AuthTokenPair:
+      description: Access token & Refresh token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              access_token: 
+                type: string
+              refresh_token:
+                type: string
+
+    UnknownServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: 
+                type: string
+                default: Something went wrong...please try again
+  schemas:
+    User:
+      type: object
+      properties:
+        _id: 
+          type: string
+          description: User id
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          description: Admin or User
+    
+    StandardError:
+      type: object
+      properties:
+        error: 
+          type: string
+          description: A error message from server
+        
+paths:
+  /api-docs:
+    get:
+      tags:
+        - Documentation
+      summary: Route on which swagger documentation is served
+      responses:
+        '200':
+          description: OK
+  
+  /user/login:
+    post:
+      tags:
+        - Authentication
+      summary: Allows user login
+      requestBody:
+        description: Takes user email and password
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: 
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthTokenPair'
+
+        '400':
+          description: JSON payload validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+                    description: A error message from server
+
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardError'
+
+        '500':
+          $ref: '#/components/responses/UnknownServerError'  
+
+  /user/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Returns new access token along with new refresh token
+      parameters:
+      - in: header
+        name: Authorization
+        description: takes "REFRESH TOKEN" (Will not work in swagger try-it feature due to OpenApi 3.0 specification)
+        required: true
+        schema:
+          type: string
+    
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthTokenPair'
+
+        '400':
+          description: JSON payload validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+                    description: A error message from server
+
+        '401':
+          description: Invalid refresh token or refresh token is expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardError'
+
+        '500':
+           $ref: '#/components/responses/UnknownServerError' 
+
+  /user:
+    post:
+      tags:
+        - User
+      summary: Create User
+      security:
+        - Bearer: []
+      requestBody:
+        description: A user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                  default: Sample
+                lastname:
+                  type: string
+                  default: User
+                email:
+                  type: string
+                  default: sample.user@gmail.com
+                password:
+                  type: string
+                  default: letmein@123
+                role:
+                  type: string
+                  default: User
+      responses:
+        '201':
+          description: Successful user creation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg: 
+                    type: string
+                    description: A response message from server
+                  data:
+                    type: object
+                    properties:
+                      User:
+                        type: object
+                        $ref: '#/components/schemas/User'
+                    description: Returns created user
+                    
+        '400':
+          description: JSON payload validation error or Missing Authorization header
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+                    description: A error message from server
+        
+        '409':
+          description: Incase - User already exist with same email OR Invalid User Role received 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+                    description: A error message from server
+        
+        '401':
+          description: Invalid access_token OR Access token expiration (can issue new access_token by using refresh token) 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardError'
+
+        '403':
+          description: All users with role as "User" cannot access this route. Only users with "Admin" role can create new users 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardError'
+
+        '500':
+          $ref: '#/components/responses/UnknownServerError'  
+
+
+

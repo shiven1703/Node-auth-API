@@ -7,9 +7,12 @@ const { MissingHeader } = require('../../utils/customErrors')
 const createUser = async (req, res, next) => {
   try {
     const user = await validator.validate(schema.userSchema, req.body)
-    await userDAL.addUser(user)
+    const newUser = await userDAL.addUser(user)
     res.status(201).json({
       msg: 'User created',
+      data: {
+        User: newUser,
+      },
     })
   } catch (err) {
     next(err)

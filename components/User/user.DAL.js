@@ -24,13 +24,19 @@ const addUser = async ({ firstname, lastname, email, password, role }) => {
       password,
       role,
     })
+
     newUser.password = await encypter.makeHash(newUser.password)
-    const user = await newUser.save()
+
+    let user = await newUser.save()
+    user = user.toObject()
+    delete user.password
+    delete user.__v
+
     return user
   } catch (err) {
     if (err.code === 11000) {
       throw new DBValidationError('User already exist with same email address.')
-    } else if (err.errors.role.kind === 'enum') {
+    } else if ('errors' in err && err.errors.role.kind === 'enum') {
       throw new DBValidationError(err.errors.role.message)
     } else {
       throw err
