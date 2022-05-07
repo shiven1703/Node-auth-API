@@ -14,7 +14,7 @@ servers:
           - "4000"
         default: "5000"
     description: Localhost API endpoint
-  - url: https://sample.url.com/
+  - url: https://agile-plains-29279.herokuapp.com/
     description: Production API endpoint
 
 components:
