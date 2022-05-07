@@ -17,3 +17,6 @@ ACCESS_TOKEN_KEY=
 REFRESH_TOKEN_KEY=
 ```
     
+
+## Docs
+Start the server and negivate to /api-docs to access swagger docs
