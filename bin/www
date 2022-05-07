@@ -2,7 +2,7 @@ const app = require('../app')
 const config = require('config')
 const databaseConnection = require('../db')
 
-const port = config.get('app.port') || 4000
+const port = process.env.PORT || config.get('app.port')
 
 ;(async () => {
   databaseConnection()

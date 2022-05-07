@@ -91,7 +91,20 @@ const generateTokens = async ({ _id: user_id, role }) => {
       role: role,
     })
     // adding refToken to db
-    const refExpiration = DateTime.now().plus({ hours: 1 }).toUnixInteger()
+    const [expTime, expValue] = config
+      .get('modules.user.token.refresh_token.exp_time')
+      .split('')
+
+    const expirationTime =
+      expValue === 'm'
+        ? { minute: expTime }
+        : expValue === 'h'
+        ? { hour: expTime }
+        : expValue === 'd'
+        ? { day: expTime }
+        : { hour: 1 }
+
+    const refExpiration = DateTime.now().plus(expirationTime).toUnixInteger()
 
     const refToken = new refreshToken({
       token_id: tokenId,
@@ -130,8 +143,18 @@ const refreshUserTokens = async (OldrefreshToken) => {
   }
 }
 
+const clearExpiredRefreshTokens = async () => {
+  try {
+    const currentTimeUnix = DateTime.now().toUnixInteger()
+    await refreshToken.deleteMany({ expiration: { $lte: currentTimeUnix } })
+  } catch (err) {
+    throw err
+  }
+}
+
 module.exports = {
   addUser,
   authenticateUser,
   refreshUserTokens,
+  clearExpiredRefreshTokens,
 }

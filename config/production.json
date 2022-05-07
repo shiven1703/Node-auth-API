@@ -1,8 +1,23 @@
 {
     "app": {
-        "port": 6000
+        "port": 8080
     },
     "database": {
         "mongoUrl": "mongodb://localhost:27017/auth"
+    },
+    "modules": {
+        "user": {
+            "token": {
+                "access_token": {
+                    "exp_time": "5m"
+                },
+                "refresh_token": {
+                    "exp_time": "1h"
+                }
+            }
+        }
+    },
+    "crons": {
+      "timezone": "Europe/Berlin"  
     }
 }

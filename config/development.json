@@ -16,5 +16,8 @@
                 }
             }
         }
+    },
+    "crons": {
+      "timezone": "Europe/Berlin"  
     }
 }
